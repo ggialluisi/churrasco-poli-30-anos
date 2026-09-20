@@ -8,6 +8,19 @@ import type { AdminDashboard, Expense, Payment, Purchase } from "@/models/event"
 import { eventApi } from "@/services/event-api";
 
 const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+const credentialStorageKey = "churrasco-poli-admin-credential";
+
+function credentialIsCurrent(credential: string): boolean {
+  try {
+    const encodedPayload = credential.split(".")[1];
+    const normalized = encodedPayload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    const payload = JSON.parse(window.atob(padded)) as { exp?: number };
+    return typeof payload.exp === "number" && payload.exp * 1000 > Date.now() + 60_000;
+  } catch {
+    return false;
+  }
+}
 
 const paymentStatusLabels = { pending: "Pendente", reported: "Informado", confirmed: "Confirmado" } as const;
 const expenseStatusLabels = { planned: "Planejada", approved: "Aprovada", paid: "Paga", cancelled: "Cancelada" } as const;
@@ -61,6 +74,7 @@ export default function AdminPage() {
       try {
         setDashboard(await eventApi.getAdminDashboard(token));
         setCredential(token);
+        window.sessionStorage.setItem(credentialStorageKey, token);
       } catch (caught) {
         setError(caught instanceof Error ? caught.message : "Não foi possível entrar.");
       } finally { setBusy(false); }
@@ -69,7 +83,29 @@ export default function AdminPage() {
     window.google.accounts.id.renderButton(buttonRef.current, { theme: "outline", size: "large", text: "signin_with", locale: "pt-BR" });
   }, []);
 
-  useEffect(() => { if (googleReady) initialize(); }, [googleReady, initialize]);
+  useEffect(() => {
+    const storedCredential = window.sessionStorage.getItem(credentialStorageKey) || "";
+    if (!storedCredential) return;
+    if (!credentialIsCurrent(storedCredential)) {
+      window.sessionStorage.removeItem(credentialStorageKey);
+      return;
+    }
+    eventApi.getAdminDashboard(storedCredential)
+      .then((data) => { setDashboard(data); setCredential(storedCredential); })
+      .catch(() => {
+        window.sessionStorage.removeItem(credentialStorageKey);
+        setError("Sua sessão administrativa expirou. Entre novamente.");
+      })
+      .finally(() => setBusy(false));
+  }, []);
+
+  useEffect(() => { if (googleReady && !dashboard) initialize(); }, [googleReady, dashboard, initialize]);
+
+  function logout() {
+    window.sessionStorage.removeItem(credentialStorageKey);
+    window.google?.accounts.id.disableAutoSelect();
+    setDashboard(null); setCredential(""); setError(""); setMessage("");
+  }
 
   async function mutate(operation: () => Promise<AdminDashboard>, successMessage: string) {
     setBusy(true); setError(""); setMessage("");
@@ -104,7 +140,10 @@ export default function AdminPage() {
   return (
     <section className="pageShell">
       <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" onLoad={() => setGoogleReady(true)} />
-      <div className="pageIntro"><div className="eyebrow dark">ORGANIZAÇÃO</div><h1>Painel administrativo</h1><p>Gerencie participantes, pagamentos, despesas e compras do evento.</p></div>
+      <div className="adminPageHeading">
+        <div className="pageIntro"><div className="eyebrow dark">ORGANIZAÇÃO</div><h1>Painel administrativo</h1><p>Gerencie participantes, pagamentos, despesas e compras do evento.</p></div>
+        {dashboard && <button className="button outline small" onClick={logout}>Sair</button>}
+      </div>
       {!dashboard && <div className="loginCard"><div ref={buttonRef} /><p>Somente o Gmail definido no Apps Script terá acesso.</p>{busy && <p>Carregando painel...</p>}{error && <div className="formMessage error">{error}</div>}</div>}
       {dashboard && <>
         <div className="moneyGrid compact">

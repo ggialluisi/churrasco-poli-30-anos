@@ -99,6 +99,7 @@ fieldset.field { border: 0; padding: 0; margin: 0; }
 .adminSection { background: var(--cream); padding: 28px; border: 1px solid var(--line); margin-top: 18px; }
 .adminSection h2 { margin: 0 0 20px; font-size: 2rem; }
 .adminColumns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.adminPageHeading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
 .adminMessage { margin: 12px 0; }
 .adminToolbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 20px; }
 .adminToolbar h2 { margin-bottom: 3px; }
@@ -145,6 +146,8 @@ th { font-size: .68rem; letter-spacing: .08em; }
   .formCard { padding: 24px; }
   .choiceRow { flex-direction: column; }
   .adminSection { padding: 20px; }
+  .adminPageHeading { flex-direction: column; gap: 0; }
+  .adminPageHeading .button { margin: -25px 0 30px; }
   .adminToolbar { align-items: stretch; flex-direction: column; }
   .adminEditorGrid { grid-template-columns: 1fr; }
   .adminEditorGrid .field.full { grid-column: auto; }
