@@ -2,9 +2,12 @@ import { defaultEventConfig, emptySummary } from "@/config/defaults";
 import type {
   AdminDashboard,
   EventConfig,
+  Expense,
   ParticipantInput,
+  Payment,
   PublicParticipant,
   PublicSummary,
+  Purchase,
 } from "@/models/event";
 
 const apiUrl = process.env.NEXT_PUBLIC_APPS_SCRIPT_URL;
@@ -52,5 +55,23 @@ export const eventApi = {
   },
   getAdminDashboard(credential: string): Promise<AdminDashboard> {
     return post("adminDashboard", {}, credential);
+  },
+  savePayment(payment: Payment, credential: string): Promise<AdminDashboard> {
+    return post("adminSavePayment", payment, credential);
+  },
+  deletePayment(id: string, credential: string): Promise<AdminDashboard> {
+    return post("adminDeletePayment", { id }, credential);
+  },
+  saveExpense(expense: Expense, credential: string): Promise<AdminDashboard> {
+    return post("adminSaveExpense", expense, credential);
+  },
+  deleteExpense(id: string, credential: string): Promise<AdminDashboard> {
+    return post("adminDeleteExpense", { id }, credential);
+  },
+  savePurchase(purchase: Purchase, credential: string): Promise<AdminDashboard> {
+    return post("adminSavePurchase", purchase, credential);
+  },
+  deletePurchase(id: string, credential: string): Promise<AdminDashboard> {
+    return post("adminDeletePurchase", { id }, credential);
   },
 };

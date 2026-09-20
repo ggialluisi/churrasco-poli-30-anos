@@ -78,6 +78,123 @@ function getPublicSummary_() {
   };
 }
 
+function sanitizeId_(value, required) {
+  const id = String(value || '').trim();
+  if (required && !id) throw new Error('Registro inválido.');
+  if (id && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+    throw new Error('Identificador de registro inválido.');
+  }
+  return id;
+}
+
+function nonnegativeNumber_(value, label) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 0) throw new Error(label + ' deve ser um número maior ou igual a zero.');
+  return number;
+}
+
+function allowedValue_(value, allowed, label) {
+  const text = String(value || '').trim();
+  if (allowed.indexOf(text) < 0) throw new Error(label + ' inválido.');
+  return text;
+}
+
+function optionalDate_(value) {
+  const date = String(value || '').trim();
+  if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('Informe a data no formato AAAA-MM-DD.');
+  return date;
+}
+
+function findRecord_(sheetName, id) {
+  const sheet = getSpreadsheet_().getSheetByName(sheetName);
+  if (!sheet || sheet.getLastRow() < 2) return null;
+  const headers = APP.HEADERS[sheetName];
+  const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, headers.length).getValues();
+  for (let index = 0; index < values.length; index += 1) {
+    if (String(values[index][0]) === id) {
+      const record = headers.reduce(function(result, header, column) {
+        result[header] = values[index][column];
+        return result;
+      }, {});
+      return { row: index + 2, record: record };
+    }
+  }
+  return null;
+}
+
+function upsertRecord_(sheetName, input) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const sheet = getSpreadsheet_().getSheetByName(sheetName);
+    const headers = APP.HEADERS[sheetName];
+    const id = sanitizeId_(input.id, false) || Utilities.getUuid();
+    const existing = findRecord_(sheetName, id);
+    const now = new Date();
+    const record = Object.assign({}, input, {
+      id: id,
+      createdAt: existing ? existing.record.createdAt : now,
+      updatedAt: now
+    });
+    const row = headers.map(function(header) { return record[header] === undefined ? '' : record[header]; });
+    if (existing) sheet.getRange(existing.row, 1, 1, headers.length).setValues([row]);
+    else sheet.appendRow(row);
+    return id;
+  } finally { lock.releaseLock(); }
+}
+
+function deleteRecord_(sheetName, value) {
+  const id = sanitizeId_(value, true);
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const existing = findRecord_(sheetName, id);
+    if (!existing) throw new Error('Registro não encontrado.');
+    getSpreadsheet_().getSheetByName(sheetName).deleteRow(existing.row);
+  } finally { lock.releaseLock(); }
+}
+
+function savePayment_(input) {
+  const participantId = sanitizeId_(input.participantId, true);
+  const participantExists = rowsAsObjects_(APP.SHEETS.PARTICIPANTS).some(function(row) { return row.id === participantId; });
+  if (!participantExists) throw new Error('Selecione um participante válido.');
+  return upsertRecord_(APP.SHEETS.PAYMENTS, {
+    id: input.id,
+    participantId: participantId,
+    expectedAmount: nonnegativeNumber_(input.expectedAmount, 'Valor esperado'),
+    reportedAmount: nonnegativeNumber_(input.reportedAmount, 'Valor informado'),
+    status: allowedValue_(input.status, ['pending', 'reported', 'confirmed'], 'Status'),
+    paymentDate: optionalDate_(input.paymentDate),
+    notes: sanitizeText_(input.notes, 1000, false)
+  });
+}
+
+function saveExpense_(input) {
+  return upsertRecord_(APP.SHEETS.EXPENSES, {
+    id: input.id,
+    item: sanitizeText_(input.item, 180, true),
+    category: sanitizeText_(input.category, 120, true),
+    supplier: sanitizeText_(input.supplier, 180, false),
+    plannedAmount: nonnegativeNumber_(input.plannedAmount, 'Valor planejado'),
+    actualAmount: nonnegativeNumber_(input.actualAmount, 'Valor realizado'),
+    status: allowedValue_(input.status, ['planned', 'approved', 'paid', 'cancelled'], 'Status'),
+    notes: sanitizeText_(input.notes, 1000, false)
+  });
+}
+
+function savePurchase_(input) {
+  return upsertRecord_(APP.SHEETS.PURCHASES, {
+    id: input.id,
+    item: sanitizeText_(input.item, 180, true),
+    category: sanitizeText_(input.category, 120, true),
+    quantity: nonnegativeNumber_(input.quantity, 'Quantidade'),
+    unit: allowedValue_(input.unit, ['kg', 'L', 'un', 'pack', 'bag'], 'Unidade'),
+    responsible: sanitizeText_(input.responsible, 160, false),
+    status: allowedValue_(input.status, ['planned', 'assigned', 'purchased', 'cancelled'], 'Status'),
+    notes: sanitizeText_(input.notes, 1000, false)
+  });
+}
+
 function getAdminDashboard_() {
   const participants = rowsAsObjects_(APP.SHEETS.PARTICIPANTS);
   const payments = rowsAsObjects_(APP.SHEETS.PAYMENTS);

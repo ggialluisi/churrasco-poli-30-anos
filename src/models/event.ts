@@ -1,5 +1,8 @@
 export type AttendanceStatus = "confirmed" | "maybe" | "declined";
 export type PaymentStatus = "pending" | "reported" | "confirmed";
+export type ExpenseStatus = "planned" | "approved" | "paid" | "cancelled";
+export type PurchaseStatus = "planned" | "assigned" | "purchased" | "cancelled";
+export type PurchaseUnit = "kg" | "L" | "un" | "pack" | "bag";
 
 export interface EventConfig {
   eventName: string;
@@ -61,6 +64,8 @@ export interface Payment {
   status: PaymentStatus;
   paymentDate: string;
   notes: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Expense {
@@ -70,8 +75,10 @@ export interface Expense {
   supplier: string;
   plannedAmount: number;
   actualAmount: number;
-  status: string;
+  status: ExpenseStatus;
   notes: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Purchase {
@@ -79,10 +86,12 @@ export interface Purchase {
   item: string;
   category: string;
   quantity: number;
-  unit: string;
+  unit: PurchaseUnit;
   responsible: string;
-  status: string;
+  status: PurchaseStatus;
   notes: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AdminDashboard {

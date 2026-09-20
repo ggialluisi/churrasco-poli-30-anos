@@ -15,8 +15,16 @@ function doPost(e) {
     const action = String(params.action || '');
     const payload = params.payload ? JSON.parse(params.payload) : {};
     if (action === 'confirmAttendance') return json_({ ok: true, data: saveParticipant_(payload) });
-    if (action === 'adminDashboard') {
+    if (action.indexOf('admin') === 0) {
       validateAdminCredential_(String(params.credential || ''));
+      if (action === 'adminDashboard') return json_({ ok: true, data: getAdminDashboard_() });
+      if (action === 'adminSavePayment') savePayment_(payload);
+      else if (action === 'adminDeletePayment') deleteRecord_(APP.SHEETS.PAYMENTS, payload.id);
+      else if (action === 'adminSaveExpense') saveExpense_(payload);
+      else if (action === 'adminDeleteExpense') deleteRecord_(APP.SHEETS.EXPENSES, payload.id);
+      else if (action === 'adminSavePurchase') savePurchase_(payload);
+      else if (action === 'adminDeletePurchase') deleteRecord_(APP.SHEETS.PURCHASES, payload.id);
+      else throw new Error('Ação administrativa inválida.');
       return json_({ ok: true, data: getAdminDashboard_() });
     }
     throw new Error('Ação inválida.');
