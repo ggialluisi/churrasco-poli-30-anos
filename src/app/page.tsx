@@ -6,6 +6,9 @@ import { formatCurrency, formatDate } from "@/lib/format";
 
 export default function HomePage() {
   const { config, summary, warning } = useEvent();
+  const wazeUrl = config.eventAddress
+    ? `https://waze.com/ul?q=${encodeURIComponent(config.eventAddress)}&navigate=yes&utm_source=churrasco_poli_30_anos`
+    : "";
   return (
     <>
       <section className="hero">
@@ -23,7 +26,12 @@ export default function HomePage() {
       <section className="factGrid" aria-label="Informações do evento">
         <article><span className="factIcon">01</span><small>DATA</small><strong>{formatDate(config.eventDate)}</strong></article>
         <article><span className="factIcon">02</span><small>HORÁRIO</small><strong>{config.eventStartTime} — {config.eventEndTime}</strong></article>
-        <article><span className="factIcon">03</span><small>LOCAL</small><strong>{config.eventAddress}</strong></article>
+        <article>
+          <span className="factIcon">03</span>
+          <small>LOCAL</small>
+          <strong>{config.eventAddress}</strong>
+          {wazeUrl && <a className="factLink" href={wazeUrl} target="_blank" rel="noopener noreferrer">Abrir no Waze</a>}
+        </article>
         <article>
           <span className="factIcon">04</span>
           <small>CONTRIBUIÇÃO</small>
