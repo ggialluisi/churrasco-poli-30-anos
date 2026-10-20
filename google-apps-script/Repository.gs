@@ -41,10 +41,12 @@ function saveParticipant_(input) {
   const status = statuses.indexOf(input.attendanceStatus) >= 0 ? input.attendanceStatus : 'confirmed';
   const email = sanitizeText_(input.email, 160, true).toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Informe um e-mail válido.');
+  const phone = sanitizeText_(input.phone, 40, false);
+  const phoneDigits = phone.replace(/\D/g, '');
   const now = new Date();
   const participant = {
     id: Utilities.getUuid(), name: sanitizeText_(input.name, 160, true), email: email,
-    phone: sanitizeText_(input.phone, 40, false), attendanceStatus: status,
+    phone: phone, attendanceStatus: status,
     adultGuests: Math.min(10, Math.max(0, Number(input.adultGuests) || 0)),
     childGuests: Math.min(10, Math.max(0, Number(input.childGuests) || 0)),
     dietaryRestrictions: sanitizeText_(input.dietaryRestrictions, 600, false),
@@ -53,10 +55,12 @@ function saveParticipant_(input) {
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
   try {
-    const emailAlreadyRegistered = rowsAsObjects_(APP.SHEETS.PARTICIPANTS).some(function(row) {
-      return String(row.email || '').trim().toLowerCase() === email;
+    const participantAlreadyRegistered = rowsAsObjects_(APP.SHEETS.PARTICIPANTS).some(function(row) {
+      const existingEmail = String(row.email || '').trim().toLowerCase();
+      const existingPhoneDigits = String(row.phone || '').replace(/\D/g, '');
+      return existingEmail === email || (phoneDigits && existingPhoneDigits === phoneDigits);
     });
-    if (emailAlreadyRegistered) throw new Error('E-mail já cadastrado... vai zoar com o sistema de outro!');
+    if (participantAlreadyRegistered) throw new Error('E-mail ou telefone já cadastrado... vai zoar com o sistema de outro!');
     appendObject_(APP.SHEETS.PARTICIPANTS, participant);
   } finally { lock.releaseLock(); }
   return { id: participant.id };
