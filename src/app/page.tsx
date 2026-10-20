@@ -24,7 +24,15 @@ export default function HomePage() {
         <article><span className="factIcon">01</span><small>DATA</small><strong>{formatDate(config.eventDate)}</strong></article>
         <article><span className="factIcon">02</span><small>HORÁRIO</small><strong>{config.eventStartTime} — {config.eventEndTime}</strong></article>
         <article><span className="factIcon">03</span><small>LOCAL</small><strong>{config.eventAddress}</strong></article>
-        <article><span className="factIcon">04</span><small>VALOR POR ADULTO</small><strong>{config.pricePerAdult ? formatCurrency(config.pricePerAdult) : "A confirmar"}</strong></article>
+        <article>
+          <span className="factIcon">04</span>
+          <small>CONTRIBUIÇÃO</small>
+          <strong>
+            {config.pricePerAdult ? `${formatCurrency(config.pricePerAdult)} por adulto` : "A confirmar"}
+            <br />
+            Crianças: {config.pricePerChild ? formatCurrency(config.pricePerChild) : "grátis"}
+          </strong>
+        </article>
       </section>
 
       <section className="section split">
