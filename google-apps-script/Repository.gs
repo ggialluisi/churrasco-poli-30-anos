@@ -52,7 +52,13 @@ function saveParticipant_(input) {
   };
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
-  try { appendObject_(APP.SHEETS.PARTICIPANTS, participant); } finally { lock.releaseLock(); }
+  try {
+    const emailAlreadyRegistered = rowsAsObjects_(APP.SHEETS.PARTICIPANTS).some(function(row) {
+      return String(row.email || '').trim().toLowerCase() === email;
+    });
+    if (emailAlreadyRegistered) throw new Error('E-mail já cadastrado... vai zoar com o sistema de outro!');
+    appendObject_(APP.SHEETS.PARTICIPANTS, participant);
+  } finally { lock.releaseLock(); }
   return { id: participant.id };
 }
 
