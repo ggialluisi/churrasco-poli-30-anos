@@ -8,7 +8,7 @@ export const defaultEventConfig: EventConfig = {
   eventEndTime: "20:00",
   eventAddress: "Local a confirmar",
   mapsUrl: "",
-  pricePerAdult: 0,
+  pricePerAdult: 100,
   pricePerChild: 0,
   pixKey: "A confirmar",
   paymentDeadline: "",
