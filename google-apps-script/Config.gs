@@ -56,7 +56,7 @@ function seedConfig_() {
   const values = {
     eventName: 'POLI — Engenharia Química', eventSubtitle: 'Churrasco de 30 anos de formados',
     eventDate: '', eventStartTime: '12:00', eventEndTime: '20:00', eventAddress: 'Local a confirmar', mapsUrl: '',
-    pricePerAdult: '0', pricePerChild: '0', pixKey: 'A confirmar', paymentDeadline: '', confirmationDeadline: '',
+    pricePerAdult: '100', pricePerChild: '0', pixKey: 'A confirmar', paymentDeadline: '', confirmationDeadline: '',
     organizerName: 'Comissão organizadora', organizerContact: ''
   };
   const rows = APP.PUBLIC_CONFIG_KEYS.map(function(key) { return [key, values[key], true]; });
