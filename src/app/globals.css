@@ -54,7 +54,8 @@ nav a:hover { color: var(--orange); }
 .factGrid strong { margin-top: auto; line-height: 1.3; }
 .factLink { color: var(--orange); font-size: .76rem; font-weight: 800; text-decoration: underline; }
 .factLink:hover { color: var(--ink); }
-.factPix { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: .72rem; font-weight: 700; }
+.factPix { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: 1rem; font-weight: 700; line-height: 1.3; }
+.factPixNote { margin: -3px 0 0; font-size: .72rem; font-weight: 500; opacity: .7; }
 .pixCopyButton { min-width: 30px; height: 28px; padding: 0 7px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 3px; background: var(--paper); color: var(--orange); cursor: pointer; transition: color .15s, background .15s, border-color .15s; }
 .pixCopyButton:hover { color: var(--cream); background: var(--orange); border-color: var(--orange); }
 .pixCopyButton.copied { color: #35684f; background: #e9f5ee; border-color: rgba(53,104,79,.3); font-size: .68rem; font-weight: 900; }

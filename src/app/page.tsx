@@ -61,19 +61,22 @@ export default function HomePage() {
           <small>CONTRIBUIÇÃO</small>
           <strong>{config.pricePerAdult ? `${formatCurrency(config.pricePerAdult)} por adulto` : "A confirmar"}</strong>
           {config.pixKey && (
-            <div className="factPix">
-              <span>PIX: {config.pixKey}</span>
-              <button type="button" className={pixCopied ? "pixCopyButton copied" : "pixCopyButton"} onClick={copyPixKey} aria-label={pixCopied ? "Chave PIX copiada" : "Copiar chave PIX"}>
-                {pixCopied ? (
-                  "Copiado!"
-                ) : (
-                  <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="9" y="9" width="11" height="11" rx="2" />
-                    <path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3" />
-                  </svg>
-                )}
-              </button>
-            </div>
+            <>
+              <div className="factPix">
+                <span>PIX: {config.pixKey}</span>
+                <button type="button" className={pixCopied ? "pixCopyButton copied" : "pixCopyButton"} onClick={copyPixKey} aria-label={pixCopied ? "Chave PIX copiada" : "Copiar chave PIX"}>
+                  {pixCopied ? (
+                    "Copiado!"
+                  ) : (
+                    <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="9" y="9" width="11" height="11" rx="2" />
+                      <path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+              <p className="factPixNote">avisa o pipolo pelo zap 💸</p>
+            </>
           )}
         </article>
       </section>
