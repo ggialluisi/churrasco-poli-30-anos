@@ -15,7 +15,20 @@ export default function HomePage() {
 
   async function copyPixKey() {
     if (!pixKey) return;
-    await navigator.clipboard.writeText(pixKey);
+
+    try {
+      await navigator.clipboard.writeText(pixKey);
+    } catch {
+      const temporaryInput = document.createElement("textarea");
+      temporaryInput.value = pixKey;
+      temporaryInput.style.position = "fixed";
+      temporaryInput.style.opacity = "0";
+      document.body.appendChild(temporaryInput);
+      temporaryInput.select();
+      document.execCommand("copy");
+      temporaryInput.remove();
+    }
+
     setPixCopied(true);
     window.setTimeout(() => setPixCopied(false), 2000);
   }
